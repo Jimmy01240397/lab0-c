@@ -24,3 +24,6 @@ GPATH
 GRTAGS
 GSYMS
 GTAGS
+
+# vim swp file
+*.swp
