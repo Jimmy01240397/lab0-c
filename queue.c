@@ -74,12 +74,11 @@ void q_free(struct list_head *l)
 {
     if (!l)
         return;
-    for (struct list_head *node = l->next; node != l;) {
-        struct list_head *next = node->next;
+    struct list_head *node, *safe;
+    list_for_each_safe (node, safe, l) {
         list_del(node);
         element_t *element = container_of(node, element_t, list);
         e_free(element);
-        node = next;
     }
     free(l);
 }
