@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "queue.h"
+#include "strcmp.h"
 
 /* Base function for insert an element into queue */
 #define q_insert_base(head, s, list_add_method) \
@@ -25,6 +26,9 @@
     sp[bufsize - 1] = '\0';                                                  \
     return element;
 
+#define max(a, b) ((a) > (b) ? (a) : (b))
+
+#define min(a, b) ((a) < (b) ? (a) : (b))
 
 /* Notice: sometimes, Cppcheck would find the potential NULL pointer bugs,
  * but some of them cannot occur. You can suppress them by adding the
@@ -124,14 +128,37 @@ int q_size(struct list_head *head)
 /* Delete the middle node in queue */
 bool q_delete_mid(struct list_head *head)
 {
-    // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
+    if (!head || list_empty(head))
+        return false;
+    struct list_head *fast, *slow;
+    for (fast = head->next, slow = head->next;
+         fast != head && fast->next != head;
+         fast = fast->next->next, slow = slow->next) {
+    }
+    list_del(slow);
+    element_t *element = container_of(slow, element_t, list);
+    e_free(element);
     return true;
 }
 
 /* Delete all nodes that have duplicate string */
 bool q_delete_dup(struct list_head *head)
 {
-    // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
+    if (!head)
+        return false;
+
+    char *check = NULL;
+    struct list_head *node, *safe;
+
+    list_for_each_safe (node, safe, head) {
+        element_t *element = container_of(node, element_t, list);
+        if (!check || newstrcmp(check, element->value)) {
+            check = element->value;
+            continue;
+        }
+        list_del(node);
+        e_free(element);
+    }
     return true;
 }
 
