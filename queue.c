@@ -26,27 +26,24 @@
     sp[bufsize - 1] = '\0';                                                  \
     return element;
 
-#define q_ascend_and_descend(head, op)                                        \
-    if (!head)                                                                \
-        return -1;                                                            \
-    struct list_head *node, *safe, *delnode, *delsafe, *cmpnode = head->next; \
-    int len = 0;                                                              \
-    element_t *element, *cmpelement, *delelement;                             \
-    list_for_each_safe (node, safe, head) {                                   \
-        cmpelement = container_of(cmpnode, element_t, list);                  \
-        element = container_of(node, element_t, list);                        \
-        if (newstrcmp(cmpelement->value, element->value) op 0) {              \
-            for (delnode = cmpnode, delsafe = delnode->next; delnode != node; \
-                 delnode = delsafe, delsafe = delnode->next) {                \
-                delelement = container_of(delnode, element_t, list);          \
-                list_del(delnode);                                            \
-                e_free(delelement);                                           \
-            }                                                                 \
-            cmpnode = node;                                                   \
-            len = 0;                                                          \
-        }                                                                     \
-        len++;                                                                \
-    }                                                                         \
+#define q_ascend_and_descend(head, op)                         \
+    if (!head)                                                 \
+        return -1;                                             \
+    int len = 0;                                               \
+    struct list_head *node, *safe;                             \
+    element_t *element;                                        \
+    char *check = NULL;                                        \
+    for (node = head->prev, safe = node->prev; node != head;   \
+         node = safe, safe = node->prev) {                     \
+        element = container_of(node, element_t, list);         \
+        if (!check || newstrcmp(check, element->value) op 0) { \
+            check = element->value;                            \
+            len++;                                             \
+            continue;                                          \
+        }                                                      \
+        list_del(node);                                        \
+        e_free(element);                                       \
+    }                                                          \
     return len;
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
