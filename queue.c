@@ -26,24 +26,24 @@
     sp[bufsize - 1] = '\0';                                                  \
     return element;
 
-#define q_ascend_and_descend(head, op)                         \
-    if (!head)                                                 \
-        return -1;                                             \
-    int len = 0;                                               \
-    struct list_head *node, *safe;                             \
-    element_t *element;                                        \
-    char *check = NULL;                                        \
-    for (node = head->prev, safe = node->prev; node != head;   \
-         node = safe, safe = node->prev) {                     \
-        element = container_of(node, element_t, list);         \
-        if (!check || newstrcmp(check, element->value) op 0) { \
-            check = element->value;                            \
-            len++;                                             \
-            continue;                                          \
-        }                                                      \
-        list_del(node);                                        \
-        e_free(element);                                       \
-    }                                                          \
+#define q_ascend_and_descend(head, op)                        \
+    if (!head)                                                \
+        return -1;                                            \
+    int len = 0;                                              \
+    struct list_head *node, *safe;                            \
+    element_t *element;                                       \
+    char *check = NULL;                                       \
+    for (node = head->prev, safe = node->prev; node != head;  \
+         node = safe, safe = node->prev) {                    \
+        element = container_of(node, element_t, list);        \
+        if (check && newstrcmp(check, element->value) op 0) { \
+            list_del(node);                                   \
+            e_free(element);                                  \
+            continue;                                         \
+        }                                                     \
+        check = element->value;                               \
+        len++;                                                \
+    }                                                         \
     return len;
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -239,14 +239,14 @@ void q_sort(struct list_head *head, bool descend) {}
  * the right side of it */
 int q_ascend(struct list_head *head)
 {
-    q_ascend_and_descend(head, >);
+    q_ascend_and_descend(head, <);
 }
 
 /* Remove every node which has a node with a strictly greater value anywhere to
  * the right side of it */
 int q_descend(struct list_head *head)
 {
-    q_ascend_and_descend(head, <);
+    q_ascend_and_descend(head, >);
 }
 
 /* Merge all the queues into one sorted queue, which is in ascending/descending
