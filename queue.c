@@ -292,9 +292,7 @@ void q_sort(struct list_head *head, bool descend)
     while (list) {
         count++;
         if (count != powk) {
-            int index;
-            for (index = 0; !(count & (1 << index)); index++) {
-            }
+            int index = ffs(count) - 1;
             struct list_head **ppending = &pending;
             while (index--) {
                 ppending = &((*ppending)->prev);
