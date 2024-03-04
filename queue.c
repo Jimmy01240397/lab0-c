@@ -22,8 +22,10 @@
                       */                                                     \
     element_t *element = container_of(head->nextprev, element_t, list);      \
     list_del(&(element->list));                                              \
-    strncpy(sp, element->value, bufsize - 1);                                \
-    sp[bufsize - 1] = '\0';                                                  \
+    if (sp) {                                                                \
+        strncpy(sp, element->value, bufsize - 1);                            \
+        sp[bufsize - 1] = '\0';                                              \
+    }                                                                        \
     return element;
 
 #define q_ascend_and_descend(head, op)                        \
@@ -333,10 +335,55 @@ int q_descend(struct list_head *head)
     q_ascend_and_descend(head, >);
 }
 
+void queuemergeadd(struct list_head *node, queue_contex_t *queue)
+{
+    list_add_tail(node, queue->q);
+    queue->size++;
+}
+
+void queuemergesplice(struct list_head *list, queue_contex_t *queue)
+{
+    for (struct list_head *node = list, *safe; node; node = safe) {
+        safe = node->next;
+        list_add_tail(node, queue->q);
+        queue->size++;
+    }
+}
+
 /* Merge all the queues into one sorted queue, which is in ascending/descending
  * order */
 int q_merge(struct list_head *head, bool descend)
 {
-    // https://leetcode.com/problems/merge-k-sorted-lists/
-    return 0;
+    if (!head || list_empty(head))
+        return (!!head) - 1;
+    struct list_head *node, *safe;
+    queue_contex_t *mergehead;
+    int count;
+    do {
+        count = 0;
+        mergehead = NULL;
+        list_for_each_safe (node, safe, head) {
+            queue_contex_t *queue = container_of(node, queue_contex_t, chain);
+            if (!queue->q || (!queue->size && queue->q != head->next)) {
+                continue;
+            }
+            count++;
+            if (mergehead) {
+                mergehead->q->prev->next = NULL;
+                queue->q->prev->next = NULL;
+                struct list_head *nodea = mergehead->q->next,
+                                 *nodeb = queue->q->next;
+                INIT_LIST_HEAD(mergehead->q);
+                INIT_LIST_HEAD(queue->q);
+                mergehead->size = 0;
+                queue->size = 0;
+                mergelist(nodea, nodeb, descend, queuemergeadd,
+                          queuemergesplice, mergehead);
+                queue = NULL;
+                count--;
+            }
+            mergehead = queue;
+        }
+    } while (count > 1);
+    return container_of(head->next, queue_contex_t, chain)->size;
 }
