@@ -238,7 +238,7 @@ void q_reverseK(struct list_head *head, int k)
     }
 }
 
-#define mergelist(nodea, nodeb, mergeadd, mergesplice, mergehead)              \
+#define mergelist(nodea, nodeb, descend, mergeadd, mergesplice, mergehead)     \
     {                                                                          \
         struct list_head *lastnode = nodeb, *safe, **pnode;                    \
         while (nodea && nodeb) {                                               \
@@ -299,7 +299,7 @@ void q_sort(struct list_head *head, bool descend)
             }
             struct list_head *nodea = *ppending, *nodeb = nodea->prev,
                              *nextpending = nodeb->prev, **mergehead = ppending;
-            mergelist(nodea, nodeb, mergeadd, mergesplice, &mergehead);
+            mergelist(nodea, nodeb, descend, mergeadd, mergesplice, &mergehead);
             (*ppending)->prev = nextpending;
         }
         powk <<= (count == powk);
@@ -314,7 +314,7 @@ void q_sort(struct list_head *head, bool descend)
         struct list_head *nodea = head->next, *nodeb = pending,
                          *nextpending = nodeb->prev;
         INIT_LIST_HEAD(head);
-        mergelist(nodea, nodeb, list_add_tail, listmergesplice, head);
+        mergelist(nodea, nodeb, descend, list_add_tail, listmergesplice, head);
         pending = nextpending;
     }
 }
